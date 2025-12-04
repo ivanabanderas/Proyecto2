@@ -74,4 +74,3 @@ for t in coords_20_utm:
     print("Nodo más cercano (exhaustiva):", best_point)
     print("Distancia:", best_dist, "m")
     print("Node ID:", best_id, "\n\n")
-
