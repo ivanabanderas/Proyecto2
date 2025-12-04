@@ -65,7 +65,7 @@ def distance(p1,p2):
 def nearest(node, target, best_node = None, best_distance = float("inf")):
 
     if node is None:
-        return best_node, best_distance
+        return best_node.point, best_distance
     
     if node.point is not None:
         dist = distance(target, node.point)

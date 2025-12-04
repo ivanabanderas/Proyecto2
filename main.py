@@ -4,6 +4,8 @@ import osmnx as ox
 import random
 from kdTree import build_kd_tree, nearest
 
+#Componente 1
+
 G, points, node_ids = graph("Av. Mariano Otero 3000, Jardines del Sol, 45050 Zapopan, Jal.", dist=10000)
 #ox.plot_graph(G)
 
@@ -14,7 +16,7 @@ end = time.time()
 
 print(f"KD-tree construido en {end - start:.4f} segundos")
 
-import random
 sample = random.sample(list(points), 20)
 for t in sample:
-    best_node, best_dist = nearest(root, t)
+    best_node, best_dist= nearest(root, t)
+    print("El nodo es",  t,  "\n", "El mejor nodo es",  best_node.point, " con la distancia:", best_dist, "m")
