@@ -15,9 +15,7 @@ print("\nConstruyendo KD-tree...")
 start = time.time()
 root = build_kd_tree(points.tolist(), node_ids, depth=0)
 end = time.time()
-
-print(f"KD-tree construido en {end - start:.4f} segundos\n\n")
-
+kdTree_time = end - start
 
 coords_20 = [
     (20.6530146, -103.3950168), #expo guadalajara    1
@@ -49,32 +47,45 @@ for lat, lon in coords_20:
     x, y = transformer.transform(lon, lat)
     coords_20_utm.append((x, y))
 
+nearest_results = []
+kd_times = []
+
 for t in coords_20_utm:
     start = time.time()
     best_node, best_dist = nearest(root, t)
     end = time.time()
+    nearest_results.append((best_node, best_dist))
+    kd_times.append(end - start)
     print("BUSQUEDA CON KD-TREE")
-    print("Tiempo total:", end - start)
     print("Coordenada:", t)
     print("Nodo más cercano:", best_node.point)
     print("Distancia:", best_dist, "m")
     print("Node ID:", best_node.node_id, "\n\n")
 
+
+exhaustive_results = []
+exh_times = []
+
 for t in coords_20_utm:
     start = time.time()
     best_point, best_dist, best_id = exhaustive(points, node_ids, t)
     end = time.time()
+    exhaustive_results.append((best_point, best_dist))
+    exh_times.append(end - start)
     print("BUSQUEDA EXHAUSTIVA")
-    print("Tiempo total:", end - start)
     print("Coordenada:", t)
     print("Nodo más cercano", best_point)
     print("Distancia:", best_dist, "m")
     print("Node ID:", best_id, "\n\n")
 
-
 #Visualizacion componente 1
-fig, ax = ox.plot_graph(
+
+fig = plt.figure(figsize=(15, 8))
+gs = gridspec.GridSpec(1, 2, width_ratios=[3, 1])  
+ax_map = fig.add_subplot(gs[0])
+ox.plot_graph( 
     G, 
+    ax=ax_map,
     show=False, 
     close=False, 
     node_size=0,        # nodos del grafo invisibles
@@ -85,28 +96,41 @@ fig, ax = ox.plot_graph(
 x_coords = [p[0] for p in coords_20_utm]
 y_coords = [p[1] for p in coords_20_utm]
 
-ax.scatter(x_coords, y_coords, c='red', s=50, label='Coordenadas objetivo')
+ax_map.scatter(x_coords, y_coords, c='red', s=50, label='Coordenadas objetivo')
 
-# Calculamos los nodos más cercanos solo una vez
-nearest_results = [nearest(root, t)[0] for t in coords_20_utm]
+ax_map.text(
+    0.02, 0.98,
+    f"Tiempo de construcción KD-tree:\n{round(kdTree_time, 4)} s",
+    transform=ax_map.transAxes,
+    fontsize=10,
+    verticalalignment='top',
+    bbox=dict(boxstyle="round,pad=0.3", facecolor="white", alpha=0.7)
+)
 
 # Extraemos coordenadas X e Y
-nearest_x = [n.point[0] for n in nearest_results]
-nearest_y = [n.point[1] for n in nearest_results]
+nearest_x = [n.point[0] for n, _ in nearest_results]
+nearest_y = [n.point[1] for n, _ in nearest_results]
+ax_map.scatter(nearest_x, nearest_y, c='blue', s=50, label='Nodo más cercano (KD-tree)')
+ax_map.legend()
+plt.pause(3)            # Esperar 3 segundos
 
-# Calculamos los resultados de la búsqueda exhaustiva
-exhaustive_results = [exhaustive(points, node_ids, t)[0] for t in coords_20_utm]
 
 # Extraemos X e Y
-exhaustive_x = [p[0] for p in exhaustive_results]
-exhaustive_y = [p[1] for p in exhaustive_results]
+exhaustive_x = [p[0] for p, _ in exhaustive_results]
+exhaustive_y = [p[1] for p, _  in exhaustive_results]
+ax_map.scatter(exhaustive_x, exhaustive_y, c='green', s=50, label='Nodo más cercano (Busqueda exhaustiva)')
+
+ax_map.legend()
 
 
-ax.scatter(nearest_x, nearest_y, c='blue', s=50, label='Nodo más cercano (KD-tree)')
-ax.legend()
-plt.show(block=False)   # Mostrar sin bloquear
-plt.pause(3)            # Esperar 3 segundos
-ax.scatter(nearest_x, nearest_y, c='green', s=50, label='Nodo más cercano (Busqueda exhaustiva)')
+ax_table = fig.add_subplot(gs[1])
+ax_table.axis('off')  # ocultamos ejes para la tabla
 
-ax.legend()
+col_labels = ["Coordenada", "KD-tree (s)", "Exhaustiva (s)"]
+table_data = [[i+1, round(kd_times[i],5), round(exh_times[i],5)] for i in range(len(coords_20_utm))]
+table = ax_table.table(cellText=table_data, colLabels=col_labels, loc='center')
+table.auto_set_font_size(False)
+table.set_fontsize(9)
+table.scale(1, 1.5)
+
 plt.show()
