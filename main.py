@@ -1,27 +1,23 @@
 from grafo import graph
 from pyproj import Transformer
 from exhasutiva import exhaustive
+import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 import time
 import osmnx as ox
 import random
 from kdTree import build_kd_tree, nearest
 
 #Componente 1
-
 G, points, node_ids = graph("Av. Mariano Otero 3000, Jardines del Sol, 45050 Zapopan, Jal.", dist=10000)
-#ox.plot_graph(G)
 
 print("\nConstruyendo KD-tree...")
 start = time.time()
 root = build_kd_tree(points.tolist(), node_ids, depth=0)
 end = time.time()
 
-print(f"KD-tree construido en {end - start:.4f} segundos")
+print(f"KD-tree construido en {end - start:.4f} segundos\n\n")
 
-# sample = random.sample(list(points), 20)
-# for t in sample:
-#     best_node, best_dist= nearest(root, t)
-#     print("El nodo es",  t,  "\n", "El mejor nodo es",  best_node.point, " con la distancia:", best_dist, "m")
 
 coords_20 = [
     (20.6530146, -103.3950168), #expo guadalajara    1
@@ -71,7 +67,46 @@ for t in coords_20_utm:
     print("BUSQUEDA EXHAUSTIVA")
     print("Tiempo total:", end - start)
     print("Coordenada:", t)
-    print("Nodo más cercano (exhaustiva):", best_point)
+    print("Nodo más cercano", best_point)
     print("Distancia:", best_dist, "m")
     print("Node ID:", best_id, "\n\n")
 
+
+#Visualizacion componente 1
+fig, ax = ox.plot_graph(
+    G, 
+    show=False, 
+    close=False, 
+    node_size=0,        # nodos del grafo invisibles
+    edge_color='lightgray', 
+    edge_linewidth=0.5
+)
+# extraemos x, y
+x_coords = [p[0] for p in coords_20_utm]
+y_coords = [p[1] for p in coords_20_utm]
+
+ax.scatter(x_coords, y_coords, c='red', s=50, label='Coordenadas objetivo')
+
+# Calculamos los nodos más cercanos solo una vez
+nearest_results = [nearest(root, t)[0] for t in coords_20_utm]
+
+# Extraemos coordenadas X e Y
+nearest_x = [n.point[0] for n in nearest_results]
+nearest_y = [n.point[1] for n in nearest_results]
+
+# Calculamos los resultados de la búsqueda exhaustiva
+exhaustive_results = [exhaustive(points, node_ids, t)[0] for t in coords_20_utm]
+
+# Extraemos X e Y
+exhaustive_x = [p[0] for p in exhaustive_results]
+exhaustive_y = [p[1] for p in exhaustive_results]
+
+
+ax.scatter(nearest_x, nearest_y, c='blue', s=50, label='Nodo más cercano (KD-tree)')
+ax.legend()
+plt.show(block=False)   # Mostrar sin bloquear
+plt.pause(3)            # Esperar 3 segundos
+ax.scatter(nearest_x, nearest_y, c='green', s=50, label='Nodo más cercano (Busqueda exhaustiva)')
+
+ax.legend()
+plt.show()
