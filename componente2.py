@@ -15,14 +15,15 @@ from grafo import graph
 from puntosRandom import obtener_5_parejas
 
 
+
+
 G, points, node_ids = graph("Av. Mariano Otero 3000, Jardines del Sol, 45050 Zapopan, Jal.", dist=10000)
 
-G_proj = ox.project_graph(G)
 
 # metas
-# metas = obtener_5_parejas(G_proj, dist_min=100,dist_max=1000) #regresa una lista de 5 pares de puntos y verifica el rango entre ellos 1er caso (maximo 1000 metros)
-metas = obtener_5_parejas(G_proj, dist_min=1000,dist_max=5000) #regresa una lista de 5 pares de puntos y verifica el rango entre ellos 2ndo caso (de 1000 a 5000 metros)
-# metas = obtener_5_parejas(G_proj, dist_min=5000,dist_max=10000) #regresa una lista de 5 pares de puntos y verifica el rango entre ellos 1er caso (desde 5000 o más metros, (maximo llega a 10000 porque es el limite establecido en el plano))
+metas = obtener_5_parejas(G, dist_min=100,dist_max=1000) #regresa una lista de 5 pares de puntos y verifica el rango entre ellos 1er caso (maximo 1000 metros)
+# metas = obtener_5_parejas(G, dist_min=1000,dist_max=5000) #regresa una lista de 5 pares de puntos y verifica el rango entre ellos 2ndo caso (de 1000 a 5000 metros)
+# metas = obtener_5_parejas(G, dist_min=5000,dist_max=10000) #regresa una lista de 5 pares de puntos y verifica el rango entre ellos 1er caso (desde 5000 o más metros, (maximo llega a 10000 porque es el limite establecido en el plano))
 
 
 # ----------------------------------------------------------
@@ -30,10 +31,10 @@ metas = obtener_5_parejas(G_proj, dist_min=1000,dist_max=5000) #regresa una list
 # ----------------------------------------------------------
 for origen, destino in metas:
     start = time.time()
-    camino = BFS.BFSMain(G_proj, origen, destino)
+    camino = BFS.BFSMain(G, origen, destino)
     end = time.time()
 
-    print(f"\nVertice de inicio: {origen} Verice objetivo {destino} (destinos escogidos aleatoriamente)")
+    print(f"\nVertice de inicio: {origen} Verice objetivo {destino} (destinos escogidos aleatoriamente) \n")
     if camino:
         print("Camino BFS:", camino, "Tiempo:", end - start, "segundos")
         # ox.plot_graph_route(G_proj, camino, route_color='r', route_linewidth=3, node_size=0)
@@ -45,12 +46,12 @@ for origen, destino in metas:
 # ----------------------------------------------------------
 for origen, destino in metas:
     start = time.time()
-    camino = DFS.DFS(G_proj, origen, destino)
+    camino = DFS.DFS(G, origen, destino)
     end = time.time()
 
     print(f"\nVertice de inicio: {origen} Verice objetivo {destino} (destinos escogidos aleatoriamente)")
     if camino:
-        print("Camino ahora con DFS:", camino, "Tiempo:", end - start, "segundos")
+        print("\n Camino ahora con DFS:", camino, "Tiempo:", end - start, "segundos \n")
         # ox.plot_graph_route(G_proj, camino, route_color='r', route_linewidth=3, node_size=0)
     else:
         print("No existe camino BFS.")
@@ -62,7 +63,7 @@ for origen, destino in metas:
 
 for origen, destino in metas:
     start = time.time()
-    ruta, costo = UCS.UCS(G_proj, metas[2][0], metas[2][1])
+    ruta, costo = UCS.UCS(G, metas[2][0], metas[2][1])
     end = time.time()
 
     if ruta:
@@ -79,7 +80,7 @@ for origen, destino in metas:
 
 for origen, destino in metas:
     
-    problem = Astar.OSMRouteProblem(G_proj, metas[3][0], metas[3][1])
+    problem = Astar.OSMRouteProblem(G, metas[3][0], metas[3][1])
 
     start = time.time()
     result = astar(problem, graph_search=True)
@@ -89,7 +90,7 @@ for origen, destino in metas:
         print("A* no encontró ruta.")
     else:
         ruta = [state for action, state in result.path()]
-        print("Ruta A* usando SimpleAI:", ruta, " tiempo:", end-start, " segundos")
+        print("\n Ruta A* usando SimpleAI:", ruta, " tiempo:", end-start, " segundos \n")
         # ox.plot_graph_route(G_proj, ruta, route_color='red', route_linewidth=3, node_size=0)
 
 # ----------------------------------------------------------
@@ -98,7 +99,7 @@ for origen, destino in metas:
 
 
 for origen,destino in metas:
-    problem = IDDFS.OSMRouteProblem(G_proj, metas[4][0], metas[4][1])
+    problem = IDDFS.OSMRouteProblem(G, metas[4][0], metas[4][1])
 
     start = time.time()
     ruta = IDDFS.iterative_deepening_search(problem, max_depth=150)

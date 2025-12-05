@@ -1,6 +1,6 @@
 from grafo import graph
 from pyproj import Transformer
-from exhasutiva import exhaustive
+from exhaustive import exhaustive
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import time
@@ -12,9 +12,6 @@ from kdTree import build_kd_tree, nearest
 G, points, node_ids = graph("Av. Mariano Otero 3000, Jardines del Sol, 45050 Zapopan, Jal.", dist=10000)
 
 
-G_proj = ox.project_graph(G)
-
-
 print("\nConstruyendo KD-tree...")
 start = time.time()
 root = build_kd_tree(points.tolist(), node_ids, depth=0)
@@ -23,9 +20,7 @@ kdTree_time = end - start
 
 lista_de_hospitales = [
     (20.650105413559686, -103.40617560813115), #Hospital Geria
-    
     (20.645279706184876, -103.4337500405164), #Hospital el colli
-    
     (20.650567336520627, -103.38733504404179), #Hospital auxiliadora
     (20.643407372920343, -103.38272774452646), #Hospital de la cruz
     (20.634091216748587, -103.41456747510544), #Cruz verde las aguilas
@@ -40,7 +35,6 @@ lista_de_hospitales = [
     (20.674183331828086, -103.41038516849666), #hospital real san josé
     (20.680557697537616, -103.39858364470734), #Hospital anegeles del carmen
     (20.68538281842212, -103.38665591593572), #hospital terranova
-    
 ]
 
 transformer = Transformer.from_crs(4326, 32613, always_xy=True)
@@ -71,24 +65,19 @@ for t in coords_20_utm:
 from scipy.spatial import Voronoi, voronoi_plot_2d
 import numpy as np
 
-# -------------------------------------------------------
-# 1. Construcción del diagrama de Voronoi
-# -------------------------------------------------------
+
 
 coords_array = np.array(coords_20_utm)
 vor = Voronoi(coords_array)
 
-# -------------------------------------------------------
-# 2. Graficación
-# -------------------------------------------------------
 
 fig, ax = plt.subplots(figsize=(10, 10))
 voronoi_plot_2d(vor, ax=ax, show_vertices=False, line_colors='black', line_width=1)
 
-# Graficar hospitales
+#Graficar hospitales
 ax.scatter(coords_array[:,0], coords_array[:,1], c='red', s=50, label="Hospitales")
 
-# Etiquetas
+#Etiquetas
 for i, (x, y) in enumerate(coords_array):
     ax.text(x, y, f"H{i}", fontsize=9, color="darkred")
 
@@ -100,29 +89,21 @@ ax.grid(True)
 
 plt.show()
 
-# -------------------------------------------------------
-# 3. Preguntar coordenadas al usuario y clasificar
-# -------------------------------------------------------
 
 def punto_en_region(lat, lon):
-    # Transformar lat/lon a UTM
     x, y = transformer.transform(lon, lat)
     punto = np.array([x, y])
 
-    # Hallar hospital más cercano usando tu KD-tree
     best_node, dist = nearest(root, (x, y))
 
     print("Hospital más cercano:", best_node.node_id)
     print("Distancia:", dist, "m")
 
-    # Graficar punto sobre el diagrama
     fig, ax = plt.subplots(figsize=(10, 10))
     voronoi_plot_2d(vor, ax=ax, show_vertices=False, line_colors='black')
 
-    # Hospitales
     ax.scatter(coords_array[:,0], coords_array[:,1], c='red', s=50, label="Hospitales")
 
-    # Punto del usuario
     ax.scatter([x], [y], c='blue', s=80, label="Punto del usuario")
     ax.text(x, y, " Usuario", color="blue", fontsize=10)
 
@@ -133,22 +114,16 @@ def punto_en_region(lat, lon):
 
 
 def region_voronoi(lat, lon):
-    # Transformar a UTM como haces en tu código
     x, y = transformer.transform(lon, lat)
     punto = np.array([x, y])
 
-    # Distancias a TODOS los hospitales (los puntos que generan el Voronoi)
     coords = np.array(coords_20_utm)
     dists = np.linalg.norm(coords - punto, axis=1)
 
-    # Índice del hospital cuya región Voronoi contiene al punto
     idx = dists.argmin()
 
    
     return idx, lista_de_hospitales[idx], dists[idx]
-# -------------------------------------------------------
-# 4. Entrada del usuario (opcional)
-# -------------------------------------------------------
 
 print("Por favor, ingresa tu ubicacion (latitud, longitud)")
 
@@ -159,12 +134,10 @@ punto_en_region(lat, lon)
 
 idx, coordenadas, distancia = region_voronoi(lat,lon)
 
-# nodo más cercano al punto solicitado por el usuario
 ux, uy = transformer.transform(lon, lat)
 best_user_node, dist_user = nearest(root, (ux, uy))
 print(f"Nodo de inicio (más cercano al punto solicitado): {best_user_node.node_id}")
 
-# nodo más cercano al hospital más cercano al usuario
 best_hospital_node, dist_hosp = nearest_results[idx]
 print(f"Nodo destino (hospital más cercano): {best_hospital_node.node_id}")
 print(f"Distancia del hospital al nodo: {dist_hosp} m")
@@ -184,12 +157,12 @@ print(f"\nDistancia entre nodo inicio y nodo destino: {distancia_nodos:.2f} m")
 # info extra
 print(f"\nHospital más cercano (idx): {idx}")
 print(f"Coordenadas del hospital: {coordenadas}")
-print(f"Distancia usuario → hospital (UTM): {distancia:.2f} m")
+print(f"Distancia desde el usuario al hospital (UTM): {distancia:.2f} m")
 
 import Astar
 from simpleai.search import SearchProblem, astar
 
-problem = Astar.OSMRouteProblem(G_proj, best_user_node.node_id, best_hospital_node.node_id)
+problem = Astar.OSMRouteProblem(G, best_user_node.node_id, best_hospital_node.node_id)
 
 start = time.time()
 result = astar(problem, graph_search=True)
@@ -200,4 +173,4 @@ if result is None:
 else:
     ruta = [state for action, state in result.path()]
     print("\n Ruta A* usando SimpleAI:", ruta, " tiempo:", end-start, " segundos \n")
-    ox.plot_graph_route(G_proj, ruta, route_color='red', route_linewidth=3, node_size=0)
+    ox.plot_graph_route(G, ruta, route_color='red', route_linewidth=3, node_size=0)

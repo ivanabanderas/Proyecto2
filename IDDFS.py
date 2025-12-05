@@ -31,7 +31,7 @@ def depth_limited_search(problem, limit):
 
         for action in problem.actions(state):
             next_state = problem.result(state, action)
-            if next_state != parent:     # evitar volver al padre inmediato
+            if next_state != parent:    
                 result = recursive_dls(next_state, state, depth + 1)
                 if result is not None:
                     return [state] + result

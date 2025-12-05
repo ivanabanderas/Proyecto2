@@ -1,16 +1,17 @@
 from queue import LifoQueue
+import time
 import osmnx as ox
 
 
-def DFS(G, start, goal):
+def DFS(G, v_inicio, v_final):
 
     frontier = LifoQueue() 
-    frontier.put(start)
+    frontier.put(v_inicio)
 
     explored = {node: False for node in G.nodes()}
-    explored[start] = True
+    explored[v_inicio] = True
 
-    parents = {start: None}
+    parents = {v_inicio: None}
 
     while True:
         
@@ -19,17 +20,17 @@ def DFS(G, start, goal):
         
         current = frontier.get()
 
-        # Si ya llegamos al destino
-        if current == goal:
+        if current == v_final:
             path = []
             while current is not None:
                 path.append(current)
                 current = parents[current]
             return list(reversed(path))
 
-        # Explorar vecinos del nodo actual
         for neighbor in G[current]:
             if not explored[neighbor]:
                 frontier.put(neighbor)
                 explored[neighbor] = True
                 parents[neighbor] = current
+
+

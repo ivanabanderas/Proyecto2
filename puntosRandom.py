@@ -15,13 +15,13 @@ def buscar_radio(node, target, radius, results):
     axis = node.axis
     value = node.value
 
-    # Si es hoja
+    #Si es hoja
     if node.point is not None:
         if dist(target, node.point) <= radius:
             results.append((node.node_id, node.point))
         return
 
-    # Buscar en ramas relevantes
+    #buscar en ramas relevantes
     if target[axis] - radius <= value:
         buscar_radio(node.left, target, radius, results)
 
@@ -29,10 +29,7 @@ def buscar_radio(node, target, radius, results):
         buscar_radio(node.right, target, radius, results)
 
 
-# --------------------------------------------------------
-# Obtener 5 parejas dentro de un rango de distancias
-# dist_min ≤ distancia ≤ dist_max
-# --------------------------------------------------------
+
 def obtener_5_parejas(G_proj, dist_min=0, dist_max=1000):
 
     # Obtener puntos e IDs
@@ -40,36 +37,30 @@ def obtener_5_parejas(G_proj, dist_min=0, dist_max=1000):
     node_ids = []
 
     for nid, data in G_proj.nodes(data=True):
-        points.append((data['x'], data['y']))  # coordenadas proyectadas
+        points.append((data['x'], data['y'])) 
         node_ids.append(nid)
 
-    # Construir KD-tree
     root = build_kd_tree(points, node_ids)
 
-    # Map para obtener coordenadas rápidas
     id_to_point = {nid: p for nid, p in zip(node_ids, points)}
 
     parejas = []
-    nodos_usados = set()     # para garantizar nodos diferentes en cada pareja
+    nodos_usados = set()     
 
     print("Buscando parejas dentro del rango:", dist_min, "a", dist_max, "metros...")
 
-    # Iteramos en orden aleatorio para obtener variedad
     random.shuffle(node_ids)
 
     for nid in node_ids:
 
-        # Si ya está usado, lo saltamos
         if nid in nodos_usados:
             continue
 
         p = id_to_point[nid]
 
-        # Buscar candidatos dentro del radio máximo
         encontrados = []
         buscar_radio(root, p, dist_max, encontrados)
 
-        # Filtrar por rango mínimo y nodos no usados
         candidatos = [(vid, pt) for vid, pt in encontrados
                       if vid != nid
                       and vid not in nodos_usados
@@ -78,7 +69,6 @@ def obtener_5_parejas(G_proj, dist_min=0, dist_max=1000):
         if not candidatos:
             continue
 
-        # Elegimos 1 vecino para emparejar
         vecino_id, _ = random.choice(candidatos)
 
         parejas.append((nid, vecino_id))
