@@ -33,10 +33,7 @@ def buscar_radio(node, target, radius, results):
 # Obtener 5 parejas dentro de un rango de distancias
 # dist_min ≤ distancia ≤ dist_max
 # --------------------------------------------------------
-def obtener_5_parejas(direccion, dist_min=0, dist_max=1000):
-    print("Descargando grafo...")
-    G = ox.graph_from_address(direccion, dist=10000, network_type='drive')
-    G_proj = ox.project_graph(G)
+def obtener_5_parejas(G_proj, dist_min=0, dist_max=1000):
 
     # Obtener puntos e IDs
     points = []
@@ -98,13 +95,14 @@ def obtener_5_parejas(direccion, dist_min=0, dist_max=1000):
 # Ejemplo de uso
 # --------------------------------------------------------
 direccion = "Av. Mariano Otero 3000, Jardines del Sol, 45050 Zapopan, Jal."
+G = ox.graph_from_address(direccion, dist=10000, network_type='drive')
+G_proj = ox.project_graph(G)
+
 
 pares = obtener_5_parejas(
-    direccion,
+    G_proj,
     dist_min=100,      # mínimo en metros
     dist_max=1000      # máximo en metros
 )
 
-print("Parejas encontradas:")
-for a, b in pares:
-    print(a, b)
+print(pares)
