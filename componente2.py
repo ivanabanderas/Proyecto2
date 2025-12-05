@@ -12,6 +12,7 @@ import time
 import osmnx as ox
 from simpleai.search import SearchProblem, astar
 from grafo import graph
+from puntosRandom import pares_nodos_por_distancia
 
 
 G, points, node_ids = graph("Av. Mariano Otero 3000, Jardines del Sol, 45050 Zapopan, Jal.", dist=10000)
@@ -19,20 +20,13 @@ G, points, node_ids = graph("Av. Mariano Otero 3000, Jardines del Sol, 45050 Zap
 G_proj = ox.project_graph(G)
 
 # metas
-metas = [
-    [4758713730, 1780012311],
-    [1975947235, 1609786704],
-    [1796560746, 1796560732],
-    [1380714005, 6135370558],
-    [1368257237, 631800880]
-]
 
 
 # ----------------------------------------------------------
 #  BFS
 # ----------------------------------------------------------
 start = time.time()
-caminoBFS = BFS.BFSMain(G_proj, metas[0][0], metas[0][1])
+caminoBFS = BFS.BFSMain(G_proj, metas[0]["nodo_1"], metas[0]["nodo_2"])
 end = time.time()
 
 if caminoBFS:
@@ -46,7 +40,7 @@ else:
 #  DFS
 # ----------------------------------------------------------
 start = time.time()
-caminoDFS = DFS.DFS(G_proj, metas[1][0], metas[1][1])
+caminoDFS = DFS.DFS(G_proj, metas[1]["nodo_1"], metas[1]["nodo_2"])
 end = time.time()
 
 if caminoDFS:
@@ -60,7 +54,7 @@ else:
 #  UCS
 # ----------------------------------------------------------
 start = time.time()
-ruta, costo = UCS.UCS(G_proj, metas[2][0], metas[2][1])
+ruta, costo = UCS.UCS(G_proj, metas[2]["nodo_1"], metas[2]["nodo_2"])
 end = time.time()
 
 if ruta:
@@ -74,7 +68,7 @@ else:
 #  A*
 # ----------------------------------------------------------
 
-problem = Astar.OSMRouteProblem(G_proj, metas[3][0], metas[3][1])
+problem = Astar.OSMRouteProblem(G_proj, metas[3]["nodo_1"], metas[3]["nodo_2"])
 
 start = time.time()
 result = astar(problem, graph_search=True)
@@ -91,7 +85,7 @@ else:
 #  IDDFS  (CORRECCIÓN PRINCIPAL AQUÍ)
 # ----------------------------------------------------------
 
-problem = IDDFS.OSMRouteProblem(G_proj, metas[4][0], metas[4][1])
+problem = IDDFS.OSMRouteProblem(G_proj, metas[4]["nodo_1"], metas[4]["nodo_2"])
 
 start = time.time()
 ruta = IDDFS.iterative_deepening_search(problem, max_depth=150)
