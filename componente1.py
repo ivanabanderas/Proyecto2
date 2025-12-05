@@ -1,6 +1,6 @@
 from grafo import graph
 from pyproj import Transformer
-from exhasutiva import exhaustive
+from exhaustive import exhaustive
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import time
