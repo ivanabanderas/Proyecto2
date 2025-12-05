@@ -31,6 +31,5 @@ class OSMRouteProblem(SearchProblem):
         return state == self.goal
 
 
-# <<< AÑADE ESTO ABAJO Y DEJA TODO VACÍO >>>
 if __name__ == "__componente2__":
     pass

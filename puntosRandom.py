@@ -91,18 +91,3 @@ def obtener_5_parejas(G_proj, dist_min=0, dist_max=1000):
     return parejas
 
 
-# --------------------------------------------------------
-# Ejemplo de uso
-# --------------------------------------------------------
-direccion = "Av. Mariano Otero 3000, Jardines del Sol, 45050 Zapopan, Jal."
-G = ox.graph_from_address(direccion, dist=10000, network_type='drive')
-G_proj = ox.project_graph(G)
-
-
-pares = obtener_5_parejas(
-    G_proj,
-    dist_min=100,      # mínimo en metros
-    dist_max=1000      # máximo en metros
-)
-
-print(pares)
